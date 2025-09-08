@@ -455,7 +455,8 @@ Chosen Archetype:`;
             model: 'gemini-2.5-flash',
             contents: [{ role: 'user', parts: [{ text: prompt }] }]
         });
-        const chosenVoice = response.text.trim();
+        // Sanitize the response to improve matching reliability
+        const chosenVoice = response.text.replace(/[.,]/g, '').trim();
         
         if (availableVoices.includes(chosenVoice)) {
             return chosenVoice;

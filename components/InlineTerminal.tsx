@@ -9,26 +9,49 @@ const messages = [
   "FINALIZING_ORIGINS...",
 ];
 
-export const InlineTerminal: React.FC = () => {
-    const [currentMessage, setCurrentMessage] = useState(messages[0]);
-    
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setCurrentMessage(prev => {
-                const currentIndex = messages.indexOf(prev);
-                const nextIndex = (currentIndex + 1) % messages.length;
-                return messages[nextIndex];
-            });
-        }, 1500); // Change message every 1.5 seconds
+const TypedMessage: React.FC<{ text: string; onComplete: () => void; }> = ({ text, onComplete }) => {
+    const [displayedText, setDisplayedText] = useState('');
 
-        return () => clearInterval(interval);
-    }, []);
+    useEffect(() => {
+        setDisplayedText(''); // Reset on new text
+        let i = 0;
+        const intervalId = setInterval(() => {
+            if (i < text.length) {
+                setDisplayedText(prev => text.substring(0, i + 1));
+                i++;
+            } else {
+                clearInterval(intervalId);
+                setTimeout(onComplete, 1000); // Pause for 1 sec on complete message
+            }
+        }, 35);
+        return () => clearInterval(intervalId);
+    }, [text, onComplete]);
+
+    const isComplete = displayedText.length === text.length;
 
     return (
+        <p className="text-lg" style={{ fontFamily: "'VT323', monospace", color: 'var(--theme-text-color-dim)' }}>
+            [ {displayedText}
+            {!isComplete && <span className="animate-ping">_</span>}
+            {isComplete && <span className="animate-pulse">...</span>} ]
+        </p>
+    );
+};
+
+
+export const InlineTerminal: React.FC = () => {
+    const [messageIndex, setMessageIndex] = useState(0);
+
+    const handleMessageComplete = () => {
+        setMessageIndex(prevIndex => (prevIndex + 1) % messages.length);
+    };
+    
+    return (
         <div className="p-4 bg-black/50 text-center" style={{ border: '1px dashed var(--theme-border-color-xlight)' }}>
-            <p className="text-lg animate-pulse" style={{ fontFamily: "'VT323', monospace", color: 'var(--theme-text-color-dim)' }}>
-                [ {currentMessage} ]
-            </p>
+            <TypedMessage 
+                text={messages[messageIndex]}
+                onComplete={handleMessageComplete}
+            />
         </div>
     );
 };

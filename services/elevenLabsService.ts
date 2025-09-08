@@ -1,10 +1,11 @@
+// A curated list of verified, high-quality pre-made voice IDs from ElevenLabs.
 export const VOICE_MAP: Record<string, string> = {
-    'Deep Male': 'pNInz6obpgDQGcFmaJgB',    // Adam
-    'Calm Female': '21m00Tcm4TlvDq8ikWAM',   // Rachel
-    'Old Male': 'JBFqnCBsd6RMkjVDRZzb',     // George
-    'Raspy Male': '2EiwWnXFnvU5JabPnv8n',     // Clyde
-    'Smooth Female': 'EXAVITQu4vr4xnSDxMaL', // Bella
-    'Young Male': 'N2lVS1w4EtoT3dr4eOWO',    // Callum
+    'American Male, Deep & Narrator': 'pNInz6obpgDQGcFmaJgB',    // Adam
+    'American Female, Calm & Clear': '21m00Tcm4TlvDq8ikWAM',   // Rachel
+    'British Male, Sophisticated': 'ZQe5CZNOzWyzPSCn5a3c',      // James
+    'American Female, Youthful & Expressive': 'jBpfuIE2acCO8z3wKNLl', // Gigi
+    'American Male, Raspy & Aged': '2EiwWnXFnvU5JabPnv8n',     // Clyde
+    'American Female, Smooth & Raspy': 'EXAVITQu4vr4xnSDxMaL', // Bella
 };
 
 const getApiKey = (): string | null => {
