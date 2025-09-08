@@ -23,12 +23,12 @@ const characterArchetypes = {
 type ArchetypeName = keyof typeof characterArchetypes;
 
 const artStyles: { name: ArtStyle; image: string }[] = [
-    { name: 'Anime', image: 'https://storage.googleapis.com/static.a-ai-generative-content/public/character-gen-v2/Anime.jpg' },
-    { name: 'Realistic', image: 'https://storage.googleapis.com/static.a-ai-generative-content/public/character-gen-v2/Realistic.jpg' },
-    { name: 'Cartoonish', image: 'https://storage.googleapis.com/static.a-ai-generative-content/public/character-gen-v2/Cartoonish.jpg' },
-    { name: 'Steampunk', image: 'https://storage.googleapis.com/static.a-ai-generative-content/public/character-gen-v2/Steampunk.jpg' },
-    { name: 'Cyberpunk', image: 'https://storage.googleapis.com/static.a-ai-generative-content/public/character-gen-v2/Cyberpunk.jpg' },
-    { name: 'Fantasy', image: 'https://storage.googleapis.com/static.a-ai-generative-content/public/character-gen-v2/Fantasy.jpg' },
+    { name: 'Anime', image: 'https://github-production-user-asset-6210df.s3.amazonaws.com/128820939/486609463-c409d9e6-b67a-43c5-9d3b-fb405b69b804.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20250908%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250908T052025Z&X-Amz-Expires=300&X-Amz-Signature=0db4750f5d3f5d1b4e3b8c58e34558a7f3212cfcaabd5bb8132ecaddec63d691&X-Amz-SignedHeaders=host' },
+    { name: 'Realistic', image: 'https://github-production-user-asset-6210df.s3.amazonaws.com/128820939/486609858-07403427-a7f0-4346-ab41-a3c742208ed3.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20250908%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250908T052051Z&X-Amz-Expires=300&X-Amz-Signature=107917526eb67f9d023571bd884b8711c9a7c5d9c255a52fe74cf9b73fd30f84&X-Amz-SignedHeaders=host' },
+    { name: 'Cartoonish', image: 'https://github-production-user-asset-6210df.s3.amazonaws.com/128820939/486609991-8dc60097-e9a0-45c0-a450-527cf3abb6e1.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20250908%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250908T052126Z&X-Amz-Expires=300&X-Amz-Signature=d14181bc80596a05bcd6566d5798d2448dd627595345bf6bddb7cd77d760c383&X-Amz-SignedHeaders=host' },
+    { name: 'Steampunk', image: 'https://github-production-user-asset-6210df.s3.amazonaws.com/128820939/486610102-521313fd-4cbd-41f1-a448-3261b5361f4b.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20250908%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250908T052147Z&X-Amz-Expires=300&X-Amz-Signature=80408c8ba96b3f424ce8b1ee173fe00e2c588f6c2a91088f8324ab0fd381c887&X-Amz-SignedHeaders=host' },
+    { name: 'Cyberpunk', image: 'http://github-production-user-asset-6210df.s3.amazonaws.com/128820939/486610205-eb1ed53d-c80d-42e3-9e67-29b13c5fcf83.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20250908%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250908T052211Z&X-Amz-Expires=300&X-Amz-Signature=321fa433bf6532879e2fcb68936efd882eefa91f32242c6398ceeaa7a1a006da&X-Amz-SignedHeaders=host' },
+    { name: 'Fantasy', image: 'https://github-production-user-asset-6210df.s3.amazonaws.com/128820939/486610337-532fbc5d-c82e-4480-9d19-5fa059f79df9.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20250908%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20250908T052231Z&X-Amz-Expires=300&X-Amz-Signature=7094ab103f3221044757031bccbd91a53c2b2e6d41b32fc06472d0051c78ea7c&X-Amz-SignedHeaders=host' },
 ];
 
 const DossierToggle = ({ checked, onChange, disabled }: { checked: boolean, onChange: (checked: boolean) => void, disabled: boolean }) => (

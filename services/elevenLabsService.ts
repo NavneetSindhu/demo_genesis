@@ -1,11 +1,13 @@
-// A curated list of verified, high-quality pre-made voice IDs from ElevenLabs.
+// A curated list of verified, high-quality pre-made voice IDs from ElevenLabs,
+// categorized by common character archetypes for more robust AI selection.
 export const VOICE_MAP: Record<string, string> = {
-    'American Male, Deep & Narrator': 'pNInz6obpgDQGcFmaJgB',    // Adam
-    'American Female, Calm & Clear': '21m00Tcm4TlvDq8ikWAM',   // Rachel
-    'British Male, Sophisticated': 'ZQe5CZNOzWyzPSCn5a3c',      // James
-    'American Female, Youthful & Expressive': 'jBpfuIE2acCO8z3wKNLl', // Gigi
-    'American Male, Raspy & Aged': '2EiwWnXFnvU5JabPnv8n',     // Clyde
-    'American Female, Smooth & Raspy': 'EXAVITQu4vr4xnSDxMaL', // Bella
+    'Young Adult Female': '21m00Tcm4TlvDq8ikWAM',   // Rachel: Calm, clear, American accent.
+    'Young Adult Male': 'ErXwobaYiN019P7URALa',     // Drew: Conversational, American accent.
+    'Middle-Aged Female': 'EXAVITQu4vr4xnSDxMaL', // Bella: Smooth, raspy, American accent.
+    'Middle-Aged Male': 'pNInz6obpgDQGcFmaJgB',    // Adam: Deep, narrator, American accent.
+    'Old Female': 'ThT5KcBeYPX3keUQqHPh',           // Dorothy: Old, wise, British accent.
+    'Old Male': '2EiwWnXFnvU5JabPnv8n',             // Clyde: Raspy, aged, American accent.
+    'Child Female': 'jBpfuIE2acCO8z3wKNLl',         // Gigi: Youthful, expressive, female child voice.
 };
 
 const getApiKey = (): string | null => {
@@ -32,7 +34,7 @@ export const updateUserElevenLabsApiKey = (apiKey: string | null) => {
   }
 };
 
-export const generateSpeech = async (text: string, voiceId: string): Promise<string> => {
+export const generateSpeech = async (text: string, voiceId: string, signal: AbortSignal): Promise<string> => {
     const apiKey = getApiKey();
     if (!apiKey) {
         throw new Error("ElevenLabs API key not provided. Please set it in the header.");
@@ -43,6 +45,7 @@ export const generateSpeech = async (text: string, voiceId: string): Promise<str
     try {
         const response = await fetch(ELEVENLABS_API_URL, {
             method: 'POST',
+            signal,
             headers: {
                 'Accept': 'audio/mpeg',
                 'Content-Type': 'application/json',
@@ -71,6 +74,11 @@ export const generateSpeech = async (text: string, voiceId: string): Promise<str
         return URL.createObjectURL(audioBlob);
 
     } catch (e) {
+        if ((e as Error).name === 'AbortError') {
+             console.log('Speech generation request was cancelled.');
+             throw e;
+        }
+        
         const errorMessage = e instanceof Error ? e.message : String(e);
         console.error("Error generating speech:", errorMessage);
         

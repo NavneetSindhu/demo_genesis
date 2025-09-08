@@ -95,7 +95,7 @@ export const GenerationBlock: React.FC<GenerationBlockProps> = ({
 
     prevStatusRef.current = status;
 
-  }, [isLatest, status]);
+  }, [isLatest, status, generationSet.images.length]);
   
   const handleSave = () => {
     if (onUpdateTitle && titleValue.trim() && titleValue.trim() !== (prompt.title || prompt.scene)) {
@@ -219,6 +219,7 @@ export const GenerationBlock: React.FC<GenerationBlockProps> = ({
                       <DossierFile 
                         dossier={dossier} 
                         historyItemId={id}
+                        characterDesc={prompt.characterDesc}
                         onGenerateOriginStory={onGenerateOriginStory}
                         onSetCharacterVoice={onSetCharacterVoice}
                       />

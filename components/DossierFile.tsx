@@ -1,13 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
 import type { Dossier } from '../types';
 import { InlineTerminal } from './InlineTerminal';
-import { AudioPlayer } from './AudioPlayer';
+import { WaveformPlayer } from './WaveformPlayer';
 import { generateSpeech, VOICE_MAP } from '../services/elevenLabsService';
 import { generateVoiceSelection } from '../services/geminiService';
 
 interface DossierFileProps {
     dossier: Dossier | 'generating';
     historyItemId: string;
+    characterDesc: string;
     onGenerateOriginStory?: (historyItemId: string) => void;
     onSetCharacterVoice?: (historyItemId: string, voiceArchetype: string, voiceId: string) => void;
 }
@@ -29,14 +30,17 @@ const DossierListField: React.FC<{ label: string; items: string[] }> = ({ label,
 );
 
 
-export const DossierFile: React.FC<DossierFileProps> = ({ dossier, historyItemId, onGenerateOriginStory, onSetCharacterVoice }) => {
+export const DossierFile: React.FC<DossierFileProps> = ({ dossier, historyItemId, characterDesc, onGenerateOriginStory, onSetCharacterVoice }) => {
     const [copyStatus, setCopyStatus] = useState<'idle' | 'copied'>('idle');
     const [audioState, setAudioState] = useState<'idle' | 'loading' | 'determining_voice' | 'playing' | 'paused' | 'error'>('idle');
     const [audioError, setAudioError] = useState<string | null>(null);
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
-    const audioRef = useRef<HTMLAudioElement | null>(null);
 
+    const audioRef = useRef<HTMLAudioElement | null>(null);
+    const audioRequestController = useRef<AbortController | null>(null);
+
+    // Main cleanup effect
     useEffect(() => {
         return () => {
             if (audioRef.current) {
@@ -46,9 +50,11 @@ export const DossierFile: React.FC<DossierFileProps> = ({ dossier, historyItemId
                 }
                 audioRef.current = null;
             }
+            audioRequestController.current?.abort();
         };
     }, []);
 
+    // Effect to reset audio state when the character/dossier changes
     useEffect(() => {
         if (audioRef.current) {
             audioRef.current.pause();
@@ -56,6 +62,8 @@ export const DossierFile: React.FC<DossierFileProps> = ({ dossier, historyItemId
                 URL.revokeObjectURL(audioRef.current.src);
             }
         }
+        audioRequestController.current?.abort();
+        audioRequestController.current = null;
         audioRef.current = null;
         setAudioState('idle');
         setAudioError(null);
@@ -66,14 +74,20 @@ export const DossierFile: React.FC<DossierFileProps> = ({ dossier, historyItemId
     const handlePlayPause = async () => {
         if (typeof dossier !== 'object' || !dossier.originStory || dossier.originStory === 'generating') return;
 
+        // Handle simple play/pause if audio is already loaded
         if (audioRef.current) {
             if (audioState === 'playing') {
                 audioRef.current.pause();
             } else if (audioState === 'paused' || audioState === 'idle') {
-                audioRef.current.play();
+                audioRef.current.play().catch(e => console.error("Audio play failed:", e));
             }
             return;
         }
+
+        // Cancel any previous, still-running request
+        audioRequestController.current?.abort();
+        audioRequestController.current = new AbortController();
+        const signal = audioRequestController.current.signal;
 
         setAudioError(null);
         let voiceToUse = dossier.voiceId;
@@ -82,7 +96,7 @@ export const DossierFile: React.FC<DossierFileProps> = ({ dossier, historyItemId
             if (!voiceToUse) {
                 setAudioState('determining_voice');
                 const availableArchetypes = Object.keys(VOICE_MAP);
-                const chosenArchetype = await generateVoiceSelection(dossier, availableArchetypes);
+                const chosenArchetype = await generateVoiceSelection(dossier, characterDesc, availableArchetypes);
                 voiceToUse = VOICE_MAP[chosenArchetype];
                 
                 if (!voiceToUse) throw new Error(`Could not find a voice ID for archetype: ${chosenArchetype}`);
@@ -91,7 +105,13 @@ export const DossierFile: React.FC<DossierFileProps> = ({ dossier, historyItemId
             }
 
             setAudioState('loading');
-            const blobUrl = await generateSpeech(dossier.originStory, voiceToUse);
+            const blobUrl = await generateSpeech(dossier.originStory, voiceToUse, signal);
+            
+            if (signal.aborted) {
+                URL.revokeObjectURL(blobUrl);
+                return;
+            }
+
             const audio = new Audio(blobUrl);
             audioRef.current = audio;
             
@@ -108,9 +128,18 @@ export const DossierFile: React.FC<DossierFileProps> = ({ dossier, historyItemId
                 setAudioState('error');
                 if (audio.src.startsWith('blob:')) URL.revokeObjectURL(audio.src);
             };
-            audio.play();
+            audio.play().catch(e => {
+                console.error("Audio play failed:", e);
+                setAudioError("Playback failed. Please try again.");
+                setAudioState('error');
+            });
+            audioRequestController.current = null;
 
         } catch (err) {
+            if ((err as Error).name === 'AbortError') {
+                console.log('Audio generation was aborted by the user.');
+                return;
+            }
             const errorMessage = err instanceof Error ? err.message : "An unknown error occurred.";
              if (errorMessage.includes('API key')) {
                 setAudioError("ElevenLabs API key is missing or invalid.");
@@ -118,6 +147,7 @@ export const DossierFile: React.FC<DossierFileProps> = ({ dossier, historyItemId
                 setAudioError(errorMessage);
             }
             setAudioState('error');
+            audioRequestController.current = null;
         }
     };
     
@@ -135,6 +165,7 @@ export const DossierFile: React.FC<DossierFileProps> = ({ dossier, historyItemId
                 URL.revokeObjectURL(audioRef.current.src);
             }
         }
+        audioRequestController.current?.abort();
         audioRef.current = null;
         setAudioState('idle');
         setAudioError(null);
@@ -249,7 +280,7 @@ ${dossier.originStory && typeof dossier.originStory === 'string' ? `\nORIGIN STO
                                 {dossier.originStory}
                             </p>
                            {duration > 0 ? (
-                                <AudioPlayer
+                                <WaveformPlayer
                                     isPlaying={audioState === 'playing'}
                                     duration={duration}
                                     currentTime={currentTime}

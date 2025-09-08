@@ -278,7 +278,7 @@ const App: React.FC = () => {
         setGenerationHistory(prev => 
             prev.map(item => 
                 item.id === historyItemId 
-                    ? { ...item, images: [...item.images, ...newImages] } 
+                    ? { ...item, images: [...newImages, ...item.images] } 
                     : item
             )
         );

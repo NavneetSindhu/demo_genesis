@@ -433,21 +433,31 @@ Generate a new character description, a scene they would be in, and a full dossi
     }
 };
 
-export const generateVoiceSelection = async (dossier: Dossier, availableVoices: string[]): Promise<string> => {
+export const generateVoiceSelection = async (dossier: Dossier, characterDesc: string, availableVoices: string[]): Promise<string> => {
     const prompt = `
-Analyze the following character dossier and choose the most fitting voice archetype from the provided list.
-Respond with ONLY the name of the chosen archetype (e.g., "Deep Male").
+Analyze the following character's core description and dossier to determine their most likely voice profile based on gender and age cues.
+Choose ONLY ONE of the following profiles that best fits the character.
+
+Available Voice Profiles:
+${availableVoices.join('\n')}
+
+Character's Core Description:
+"${characterDesc}"
 
 Character Dossier:
 - Callsign: ${dossier.callsign}
 - Background: ${dossier.background}
-- Abilities: ${dossier.abilities.join(', ')}
 - Quote: "${dossier.quote}"
 
-Available Voice Archetypes:
-${availableVoices.join('\n')}
+Analysis Cues:
+- For gender, look for terms like "male", "female", "he", "she", "non-binary", "android".
+- For age, look for terms like "young", "old", "grizzled", "elegant", "boy", "girl", "veteran".
+- If the gender is ambiguous or non-binary, choose a suitable neutral-sounding voice like 'Young Adult Female' or 'Young Adult Male'.
+- If the character is a non-human entity (like an android), infer a likely voice presentation from the description (e.g., "sleek female android" implies a female voice).
 
-Chosen Archetype:`;
+Based on your analysis, respond with ONLY the name of the chosen profile (e.g., "Old Male").
+
+Chosen Profile:`;
 
     try {
         const client = getAiClient();
