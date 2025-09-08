@@ -19,7 +19,7 @@ const getApiKey = (): string | null => {
   } catch (e) {
     console.error("Could not read ElevenLabs API key from localStorage", e);
   }
-  return null;
+  return process.env.ELEVENLABS_API_KEY || null;
 };
 
 export const updateUserElevenLabsApiKey = (apiKey: string | null) => {
