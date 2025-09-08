@@ -186,8 +186,11 @@ export const generateCharacterImage = async (
       return imagePart.inlineData.data;
     };
     
-    const results = [await generateVariation(), await generateVariation()];
-    return results;
+    // Serialized with a small delay to prevent XHR errors
+    const result1 = await generateVariation();
+    await new Promise(resolve => setTimeout(resolve, 250));
+    const result2 = await generateVariation();
+    return [result1, result2];
 
   } catch(e) {
     const errorMessage = e instanceof Error ? e.message : String(e);
@@ -201,74 +204,6 @@ export const generateCharacterImage = async (
     throw new Error(`Failed to generate character image. ${errorMessage}`);
   }
 };
-
-export const startVideoGeneration = async (
-  characterDesc: string,
-  scene: string,
-  artStyle: ArtStyle
-): Promise<any> => {
-  const artStylePrompt = {
-    'Anime': 'vibrant, clean-lined Japanese anime style',
-    'Realistic': 'photorealistic style, detailed textures',
-    'Cartoonish': 'playful, exaggerated cartoon style, bold outlines',
-    'Steampunk': 'Victorian-era science fiction, gears, brass, steam-powered machinery aesthetic',
-    'Cyberpunk': 'futuristic, neon-lit, dystopian, high-tech low-life aesthetic',
-    'Fantasy': 'high fantasy, magical elements, medieval, epic style with intricate details'
-  }[artStyle];
-
-  const fullPrompt = `Create a short, 3-5 second cinematic hero entrance video clip.
-- Character: ${characterDesc}
-- Scene/Action: ${scene}
-- Style: ${artStylePrompt}
-- The video should be dynamic and visually impressive. No text or watermarks.`;
-
-  try {
-    const client = getAiClient();
-    const operation = await client.models.generateVideos({
-      model: 'veo-2.0-generate-001',
-      prompt: fullPrompt,
-      config: {
-        numberOfVideos: 1,
-      },
-    });
-    return operation;
-  } catch (e) {
-    const errorMessage = e instanceof Error ? e.message : String(e);
-    console.error("Error starting video generation:", errorMessage);
-    throw new Error(`Failed to start video generation. ${errorMessage}`);
-  }
-};
-
-export const pollVideoOperation = async (operation: any): Promise<any> => {
-  try {
-    const client = getAiClient();
-    const updatedOperation = await client.operations.getVideosOperation({ operation: operation });
-    return updatedOperation;
-  } catch (e) {
-    const errorMessage = e instanceof Error ? e.message : String(e);
-    console.error("Error polling video operation:", errorMessage);
-    throw new Error(`Failed to poll video operation. ${errorMessage}`);
-  }
-};
-
-export const fetchVideoAsBlobUrl = async (uri: string): Promise<string> => {
-  try {
-    const apiKey = getApiKey();
-    if (!apiKey) throw new Error("API key not found for fetching video.");
-    
-    const response = await fetch(`${uri}&key=${apiKey}`);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch video: ${response.statusText}`);
-    }
-    const blob = await response.blob();
-    return URL.createObjectURL(blob);
-  } catch (e) {
-    const errorMessage = e instanceof Error ? e.message : String(e);
-    console.error("Error fetching video blob:", errorMessage);
-    throw new Error(`Failed to fetch video. ${errorMessage}`);
-  }
-};
-
 
 export const refineCharacterImage = async (
     originalImageB64: string, 
@@ -495,5 +430,42 @@ Generate a new character description, a scene they would be in, and a full dossi
         const errorMessage = e instanceof Error ? e.message : String(e);
         console.error("Error generating foil character:", errorMessage);
         throw new Error(`Failed to generate foil character. ${errorMessage}`);
+    }
+};
+
+export const generateVoiceSelection = async (dossier: Dossier, availableVoices: string[]): Promise<string> => {
+    const prompt = `
+Analyze the following character dossier and choose the most fitting voice archetype from the provided list.
+Respond with ONLY the name of the chosen archetype (e.g., "Deep Male").
+
+Character Dossier:
+- Callsign: ${dossier.callsign}
+- Background: ${dossier.background}
+- Abilities: ${dossier.abilities.join(', ')}
+- Quote: "${dossier.quote}"
+
+Available Voice Archetypes:
+${availableVoices.join('\n')}
+
+Chosen Archetype:`;
+
+    try {
+        const client = getAiClient();
+        const response = await client.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: [{ role: 'user', parts: [{ text: prompt }] }]
+        });
+        const chosenVoice = response.text.trim();
+        
+        if (availableVoices.includes(chosenVoice)) {
+            return chosenVoice;
+        }
+        
+        console.warn(`AI returned an unexpected voice archetype: "${chosenVoice}". Falling back to default.`);
+        return availableVoices[0]; 
+    } catch (e) {
+        const errorMessage = e instanceof Error ? e.message : String(e);
+        console.error("Error generating voice selection:", errorMessage);
+        throw new Error(`Failed to select a voice. ${errorMessage}`);
     }
 };

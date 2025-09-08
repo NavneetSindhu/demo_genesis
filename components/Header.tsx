@@ -92,11 +92,11 @@ export const Header: React.FC<HeaderProps> = ({
   const animatedNavText = useEncryptDecryptAnimation(navButtonBaseText, isGeneratorView);
 
   return (
-    <header className="flex justify-between items-start w-full gap-4 flex-wrap">
-      <div className="text-left flex-grow">
+    <header className="flex flex-col sm:flex-row sm:justify-between sm:items-start w-full gap-8 sm:gap-4">
+      <div className="text-left flex-grow w-full">
         {isGeneratorView ? (
           <>
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold title-flicker" style={{ fontFamily: "'VT323', monospace" }}>
+            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold title-flicker" style={{ fontFamily: "'VT323', monospace" }}>
               _CHARACTER_GENERATOR
             </h1>
             <p className="mt-4 text-lg max-w-2xl text-green-400/80" style={{ color: 'var(--theme-text-color-dim)' }}>
@@ -105,7 +105,7 @@ export const Header: React.FC<HeaderProps> = ({
           </>
         ) : (
           <>
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold title-flicker" style={{ fontFamily: "'VT323', monospace" }}>
+            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold title-flicker" style={{ fontFamily: "'VT323', monospace" }}>
               _CONVERSATIONAL_EDITOR
             </h1>
             <p className="mt-4 text-lg max-w-2xl text-green-400/80" style={{ color: 'var(--theme-text-color-dim)' }}>
@@ -114,7 +114,7 @@ export const Header: React.FC<HeaderProps> = ({
           </>
         )}
       </div>
-      <div className="flex-shrink-0 flex flex-col gap-4 w-72">
+      <div className="flex-shrink-0 flex flex-col gap-4 w-full sm:w-72">
         <button
           onClick={() => onNavigate(currentView === 'generator' ? 'editor' : 'generator')}
           className={`w-full py-2 px-4 border transition-colors text-lg whitespace-nowrap relative ${isGeneratorView ? 'pulse-glow-anim' : ''}`}

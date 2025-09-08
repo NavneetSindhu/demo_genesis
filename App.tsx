@@ -9,7 +9,7 @@ import { GenerationBlock } from './components/GenerationBlock';
 import { ImagePreviewModal } from './components/ImagePreviewModal';
 import { ChatEditor } from './components/ChatEditor';
 import { RefinementChatModal } from './components/RefinementChatModal';
-import { generateCharacterImage, generateCharacterDossier, startVideoGeneration, pollVideoOperation, fetchVideoAsBlobUrl, generateOriginStory, generateFoilCharacter, updateUserApiKey } from './services/geminiService';
+import { generateCharacterImage, generateCharacterDossier, generateOriginStory, generateFoilCharacter, updateUserApiKey } from './services/geminiService';
 import { updateUserElevenLabsApiKey } from './services/elevenLabsService';
 import type { ArtStyle, GeneratedImage, UploadedImage, HistoryItem, ChatMessage, Dossier } from './types';
 
@@ -87,7 +87,24 @@ const App: React.FC = () => {
     try {
       const savedHistory = sessionStorage.getItem('character-gen-history');
       if (savedHistory) {
-        setGenerationHistory(JSON.parse(savedHistory));
+        const loadedHistory: HistoryItem[] = JSON.parse(savedHistory);
+        
+        // Sanitize history to remove any 'generating' states from a page refresh
+        const sanitizedHistory = loadedHistory
+          .filter(item => item.status !== 'generating') // Remove items that were mid-generation
+          .map(item => {
+            const newItem = { ...item };
+            if (newItem.dossier === 'generating') {
+              newItem.dossier = undefined;
+            }
+            if (typeof newItem.dossier === 'object' && newItem.dossier.originStory === 'generating') {
+               const { originStory, ...restDossier } = newItem.dossier;
+               newItem.dossier = restDossier as Dossier;
+            }
+            return newItem;
+          });
+
+        setGenerationHistory(sanitizedHistory);
       }
     } catch (e) {
       console.error("Failed to load history from session storage:", e);
@@ -336,91 +353,6 @@ const App: React.FC = () => {
     }
   };
 
-
-  const handleGenerateVideo = async (historyItemId: string) => {
-    const historyItem = generationHistory.find(item => item.id === historyItemId);
-    if (!historyItem || historyItem.video?.status === 'generating') return;
-
-    setGenerationHistory(prev => prev.map(item =>
-        item.id === historyItemId
-            ? { ...item, video: { status: 'generating', error: undefined } }
-            : item
-    ));
-    setError(null);
-
-    const { characterDesc, scene, artStyle } = historyItem.prompt;
-
-    try {
-        const operation = await startVideoGeneration(characterDesc, scene, artStyle);
-        setGenerationHistory(prev => prev.map(item =>
-            item.id === historyItemId
-                ? { ...item, video: { status: 'generating', operation: operation } }
-                : item
-        ));
-    } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : String(err);
-        console.error("Error during video generation start:", errorMessage);
-        setGenerationHistory(prev => prev.map(item =>
-            item.id === historyItemId
-                ? { ...item, video: { status: 'error', error: errorMessage } }
-                : item
-        ));
-    }
-  };
-
-  useEffect(() => {
-    const poll = async () => {
-        const itemsToPoll = generationHistory.filter(
-            item => item.video?.status === 'generating' && item.video.operation
-        );
-
-        if (itemsToPoll.length === 0) return;
-
-        for (const item of itemsToPoll) {
-            try {
-                const updatedOperation = await pollVideoOperation(item.video!.operation!);
-                
-                if (updatedOperation.done) {
-                    if (updatedOperation.error) {
-                        throw new Error(updatedOperation.error.message);
-                    }
-                    
-                    const downloadLink = updatedOperation.response?.generatedVideos?.[0]?.video?.uri;
-                    if (!downloadLink) {
-                        throw new Error("Video generation finished but no video URI was found.");
-                    }
-                    
-                    const blobUrl = await fetchVideoAsBlobUrl(downloadLink);
-
-                    setGenerationHistory(prev => prev.map(h =>
-                        h.id === item.id
-                            ? { ...h, video: { status: 'complete', blobUrl: blobUrl, operation: undefined } }
-                            : h
-                    ));
-                } else {
-                    setGenerationHistory(prev => prev.map(h =>
-                        h.id === item.id
-                            ? { ...h, video: { ...h.video, status: 'generating', operation: updatedOperation } }
-                            : h
-                    ));
-                }
-            } catch (err) {
-                const errorMessage = err instanceof Error ? err.message : String(err);
-                console.error(`Error polling for video ${item.id}:`, errorMessage);
-                setGenerationHistory(prev => prev.map(h =>
-                    h.id === item.id
-                        ? { ...h, video: { status: 'error', error: errorMessage, operation: undefined } }
-                        : h
-                ));
-            }
-        }
-    };
-
-    const intervalId = setInterval(poll, 15000);
-
-    return () => clearInterval(intervalId);
-  }, [generationHistory]);
-
   const handleGenerateOriginStory = async (historyItemId: string) => {
     const itemIndex = generationHistory.findIndex(item => item.id === historyItemId);
     if (itemIndex === -1) return;
@@ -453,6 +385,22 @@ const App: React.FC = () => {
             return h;
         }));
     }
+  };
+
+  const handleSetCharacterVoice = (historyItemId: string, voiceArchetype: string, voiceId: string) => {
+    setGenerationHistory(prev => prev.map(item => {
+        if (item.id === historyItemId && typeof item.dossier === 'object') {
+            return {
+                ...item,
+                dossier: {
+                    ...item.dossier,
+                    voiceArchetype,
+                    voiceId,
+                }
+            };
+        }
+        return item;
+    }));
   };
 
 
@@ -575,8 +523,8 @@ const App: React.FC = () => {
                       onUpdateTitle={handleUpdateTitle}
                       onGenerateVariations={handleGenerateVariations}
                       onStartRefinement={handleStartRefinement}
-                      onGenerateVideo={handleGenerateVideo}
                       onGenerateOriginStory={handleGenerateOriginStory}
+                      onSetCharacterVoice={handleSetCharacterVoice}
                       onGenerateFoil={handleGenerateFoil}
                       isGeneratingVariations={variationsLoadingId === historyItem.id}
                       isGeneratingFoil={foilLoadingId === historyItem.id}

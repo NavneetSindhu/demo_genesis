@@ -22,14 +22,8 @@ export interface Dossier {
   weaknesses: string[];
   quote: string;
   originStory?: string | 'generating';
-}
-
-// FIX: Changed operationName to operation to store the entire operation object, which is required for polling.
-export interface VideoState {
-  status: 'generating' | 'complete' | 'error';
-  blobUrl?: string;
-  error?: string;
-  operation?: any;
+  voiceArchetype?: string;
+  voiceId?: string;
 }
 
 export interface HistoryItem {
@@ -45,7 +39,6 @@ export interface HistoryItem {
   timestamp: number;
   status?: 'generating' | 'complete';
   dossier?: Dossier | 'generating';
-  video?: VideoState;
 }
 
 export interface ChatMessage {

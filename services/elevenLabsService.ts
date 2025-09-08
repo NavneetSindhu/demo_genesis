@@ -1,4 +1,11 @@
-const ELEVENLABS_API_URL = "https://api.elevenlabs.io/v1/text-to-speech/21m00Tcm4TlvDq8ikWAM"; // Voice ID for "Rachel"
+export const VOICE_MAP: Record<string, string> = {
+    'Deep Male': 'pNInz6obpgDQGcFmaJgB',    // Adam
+    'Calm Female': '21m00Tcm4TlvDq8ikWAM',   // Rachel
+    'Old Male': 'JBFqnCBsd6RMkjVDRZzb',     // George
+    'Raspy Male': '2EiwWnXFnvU5JabPnv8n',     // Clyde
+    'Smooth Female': 'EXAVITQu4vr4xnSDxMaL', // Bella
+    'Young Male': 'N2lVS1w4EtoT3dr4eOWO',    // Callum
+};
 
 const getApiKey = (): string | null => {
   try {
@@ -24,11 +31,13 @@ export const updateUserElevenLabsApiKey = (apiKey: string | null) => {
   }
 };
 
-export const generateSpeech = async (text: string): Promise<string> => {
+export const generateSpeech = async (text: string, voiceId: string): Promise<string> => {
     const apiKey = getApiKey();
     if (!apiKey) {
         throw new Error("ElevenLabs API key not provided. Please set it in the header.");
     }
+
+    const ELEVENLABS_API_URL = `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`;
 
     try {
         const response = await fetch(ELEVENLABS_API_URL, {
@@ -51,6 +60,9 @@ export const generateSpeech = async (text: string): Promise<string> => {
         if (!response.ok) {
             const errorBody = await response.json().catch(() => ({ detail: { message: "Unknown error occurred" } }));
             const errorMessage = errorBody?.detail?.message || response.statusText;
+             if (errorMessage.includes("Unusual activity detected") || errorMessage.includes("Free Tier usage disabled")) {
+                throw new Error("ElevenLabs Free Tier usage was blocked due to potential VPN/proxy use or other limitations. Please check your ElevenLabs account or consider a paid plan.");
+            }
             throw new Error(`ElevenLabs API Error: ${errorMessage}`);
         }
 
@@ -60,6 +72,11 @@ export const generateSpeech = async (text: string): Promise<string> => {
     } catch (e) {
         const errorMessage = e instanceof Error ? e.message : String(e);
         console.error("Error generating speech:", errorMessage);
+        
+        if (errorMessage.includes("Unusual activity detected") || errorMessage.includes("Free Tier usage disabled")) {
+             throw new Error("ElevenLabs Free Tier usage was blocked due to potential VPN/proxy use or other limitations. Please check your ElevenLabs account or consider a paid plan.");
+        }
+
         throw new Error(`Failed to generate speech. ${errorMessage}`);
     }
 };

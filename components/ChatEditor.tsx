@@ -316,7 +316,7 @@ export const ChatEditor: React.FC<ChatEditorProps> = ({ onImagePreview, baseImag
       <div className="bg-black p-6 sm:p-8">
         {!baseImage ? (
             <div className="flex flex-col items-center justify-center h-96">
-                 <h2 className="text-4xl mb-6 text-center" style={{ fontFamily: "'VT323', monospace" }}>[ CONVERSATIONAL_IMAGE_EDITOR ]</h2>
+                 <h2 className="text-3xl sm:text-4xl mb-6 text-center" style={{ fontFamily: "'VT323', monospace" }}>[ CONVERSATIONAL_IMAGE_EDITOR ]</h2>
                  <p className="mb-8 text-center" style={{ color: 'var(--theme-text-color-dim)' }}>Upload an image to begin an interactive editing session with the AI.</p>
                  <label htmlFor="chat-image-upload" className="cursor-pointer py-3 px-6 text-xl border-2 transition-colors" style={{ fontFamily: "'VT323', monospace", borderColor: 'var(--theme-color)', color: 'var(--theme-color)' }} onMouseOver={e => { e.currentTarget.style.backgroundColor = 'var(--theme-color)'; e.currentTarget.style.color = 'black'; }} onMouseOut={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--theme-color)'; }}>
                     [ UPLOAD_IMAGE ]

@@ -4,8 +4,6 @@ import type { HistoryItem, GeneratedImage } from '../types';
 import { ImageCard } from './ImageCard';
 import { GenerationTerminal } from './GenerationTerminal';
 import { DossierFile } from './DossierFile';
-import { VideoGenerationProgress } from './VideoGenerationProgress';
-import { VideoPlayer } from './VideoPlayer';
 
 interface GenerationBlockProps {
   generationSet: HistoryItem;
@@ -14,8 +12,8 @@ interface GenerationBlockProps {
   onUpdateTitle?: (historyItemId: string, newTitle: string) => void;
   onGenerateVariations?: (historyItemId: string) => void;
   onStartRefinement?: (image: GeneratedImage) => void;
-  onGenerateVideo?: (historyItemId: string) => void;
   onGenerateOriginStory?: (historyItemId: string) => void;
+  onSetCharacterVoice?: (historyItemId: string, voiceArchetype: string, voiceId: string) => void;
   onGenerateFoil?: (historyItemId: string) => void;
   isGeneratingVariations?: boolean;
   isGeneratingFoil?: boolean;
@@ -28,8 +26,8 @@ export const GenerationBlock: React.FC<GenerationBlockProps> = ({
     onUpdateTitle, 
     onGenerateVariations, 
     onStartRefinement, 
-    onGenerateVideo,
     onGenerateOriginStory,
+    onSetCharacterVoice,
     onGenerateFoil,
     isGeneratingVariations,
     isGeneratingFoil
@@ -128,7 +126,7 @@ export const GenerationBlock: React.FC<GenerationBlockProps> = ({
               <div className="flex-1 min-w-[200px]">
                 <div className="flex items-center gap-3">
                   {isEditing ? (
-                     <div className="flex items-center text-4xl w-full" style={{ fontFamily: "'VT323', monospace" }}>
+                     <div className="flex items-center text-3xl sm:text-4xl w-full" style={{ fontFamily: "'VT323', monospace" }}>
                         <span>[</span>
                         <input
                             ref={inputRef}
@@ -142,7 +140,7 @@ export const GenerationBlock: React.FC<GenerationBlockProps> = ({
                         <span>]</span>
                     </div>
                   ) : (
-                    <h2 className="text-4xl" style={{ fontFamily: "'VT323', monospace" }}>
+                    <h2 className="text-3xl sm:text-4xl" style={{ fontFamily: "'VT323', monospace" }}>
                       [ {status === 'generating' ? 'GENERATING_TRANSMISSION' : (prompt.title || prompt.scene)} ]
                     </h2>
                   )}
@@ -222,44 +220,8 @@ export const GenerationBlock: React.FC<GenerationBlockProps> = ({
                         dossier={dossier} 
                         historyItemId={id}
                         onGenerateOriginStory={onGenerateOriginStory}
+                        onSetCharacterVoice={onSetCharacterVoice}
                       />
-                  </div>
-                )}
-
-                {status === 'complete' && !isDemo && (
-                  <div className="mt-6">
-                    {!generationSet.video || generationSet.video.status === 'error' ? (
-                      <>
-                        <button
-                          onClick={() => onGenerateVideo?.(id)}
-                          disabled={generationSet.video?.status === 'generating'}
-                          className="w-full relative py-3 px-4 text-xl font-bold border-2 focus:outline-none focus:ring-4 focus:ring-offset-2 focus:ring-offset-black disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 mt-2 pulse-glow-anim"
-                          style={{ 
-                              fontFamily: "'VT323', monospace",
-                              backgroundColor: 'var(--theme-interactive-bg-hover)',
-                              color: 'var(--theme-color)',
-                              borderColor: 'var(--theme-color)',
-                              '--tw-ring-color': 'var(--theme-color)',
-                          } as React.CSSProperties}
-                          onMouseOver={e => { if(!e.currentTarget.disabled) { e.currentTarget.style.backgroundColor = 'var(--theme-color)'; e.currentTarget.style.color = 'black'; } }}
-                          onMouseOut={e => { if(!e.currentTarget.disabled) { e.currentTarget.style.backgroundColor = 'var(--theme-interactive-bg-hover)'; e.currentTarget.style.color = 'var(--theme-color)'; } }}
-                        >
-                          [ GENERATE_VIDEO_INTRO ]
-                        </button>
-                        {generationSet.video?.status === 'error' && (
-                          <p className="mt-2 text-sm text-center" style={{ color: '#ff4d4d' }}>
-                            Video generation failed: {generationSet.video.error}
-                          </p>
-                        )}
-                      </>
-                    ) : generationSet.video.status === 'generating' ? (
-                      <VideoGenerationProgress />
-                    ) : generationSet.video.status === 'complete' && generationSet.video.blobUrl ? (
-                      <div>
-                          <h3 className="text-2xl mb-4" style={{ fontFamily: "'VT323', monospace" }}>[ CINEMATIC_INTRO ]</h3>
-                          <VideoPlayer src={generationSet.video.blobUrl} />
-                      </div>
-                    ) : null}
                   </div>
                 )}
               </div>

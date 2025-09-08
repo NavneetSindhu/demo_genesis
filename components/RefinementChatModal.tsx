@@ -240,7 +240,7 @@ export const RefinementChatModal: React.FC<RefinementChatModalProps> = ({ image,
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex justify-center items-center z-50 p-4" onClick={onClose}>
             <div className="w-full max-w-7xl h-[90vh] bg-black p-6 sm:p-8 relative flex flex-col gap-4" style={{ border: '2px solid var(--theme-border-color)' }} onClick={e => e.stopPropagation()}>
                 <div className="flex justify-between items-start flex-shrink-0">
-                    <h2 className="text-4xl" style={{ fontFamily: "'VT323', monospace" }}>[ REFINE_CHARACTER ]</h2>
+                    <h2 className="text-3xl sm:text-4xl" style={{ fontFamily: "'VT323', monospace" }}>[ REFINE_CHARACTER ]</h2>
                      <button onClick={onClose} className="text-3xl transition-colors z-10" style={{ fontFamily: "'VT323', monospace", color: 'var(--theme-color)' }} onMouseOver={e => e.currentTarget.style.color = 'white'} onMouseOut={e => e.currentTarget.style.color = 'var(--theme-color)'}>[ X ]</button>
                 </div>
                 
@@ -308,7 +308,7 @@ export const RefinementChatModal: React.FC<RefinementChatModalProps> = ({ image,
                     </div>
                 </div>
                  <div className="flex justify-end mt-4 flex-shrink-0">
-                    <button onClick={handleSaveAndClose} className="text-xl py-3 px-6 border-2 transition-colors" style={{ fontFamily: "'VT323', monospace", borderColor: 'var(--theme-color)', color: 'var(--theme-color)' }} onMouseOver={e => { e.currentTarget.style.backgroundColor = 'var(--theme-color)'; e.currentTarget.style.color = 'black'; }} onMouseOut={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--theme-color)'; }}>
+                    <button onClick={handleSaveAndClose} className="text-lg sm:text-xl py-3 px-6 border-2 transition-colors" style={{ fontFamily: "'VT323', monospace", borderColor: 'var(--theme-color)', color: 'var(--theme-color)' }} onMouseOver={e => { e.currentTarget.style.backgroundColor = 'var(--theme-color)'; e.currentTarget.style.color = 'black'; }} onMouseOut={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--theme-color)'; }}>
                         [ SAVE_&_CLOSE ]
                     </button>
                  </div>

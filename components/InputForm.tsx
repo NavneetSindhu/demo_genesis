@@ -309,7 +309,7 @@ export const InputForm: React.FC<InputFormProps> = ({ onGenerate, isLoading, has
         <button
           type="submit"
           disabled={isLoading || !characterDesc.trim() || !scene.trim()}
-          className="w-full relative py-4 px-4 text-2xl font-bold border-2 focus:outline-none focus:ring-4 focus:ring-offset-2 focus:ring-offset-black disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 mt-8"
+          className="w-full relative py-4 px-4 text-xl sm:text-2xl font-bold border-2 focus:outline-none focus:ring-4 focus:ring-offset-2 focus:ring-offset-black disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 mt-8"
           style={{ 
             fontFamily: "'VT323', monospace",
             backgroundColor: 'var(--theme-interactive-bg-hover)',
