@@ -160,7 +160,7 @@ export const Header: React.FC<HeaderProps> = ({
         <ElevenLabsApiKeyManager 
             onSetApiKey={onSetElevenLabsApiKey}
             onClearApiKey={onClearElevenLabsApiKey}
-            hasUserApiKey={hasElevenLabsApiKey}
+            hasElevenLabsApiKey={hasElevenLabsApiKey}
         />
       </div>
     </header>

@@ -162,7 +162,7 @@ export const ThemeSelector: React.FC = () => {
   };
 
   return (
-    <div ref={wrapperRef} className="relative z-[100] w-full">
+    <div ref={wrapperRef} className="relative z-[101] w-full">
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="w-full py-2 px-4 border transition-colors text-lg"

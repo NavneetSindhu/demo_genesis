@@ -3,10 +3,10 @@ import React, { useState, useRef, useEffect } from 'react';
 interface ElevenLabsApiKeyManagerProps {
   onSetApiKey: (key: string) => void;
   onClearApiKey: () => void;
-  hasUserApiKey: boolean;
+  hasElevenLabsApiKey: boolean;
 }
 
-export const ElevenLabsApiKeyManager: React.FC<ElevenLabsApiKeyManagerProps> = ({ onSetApiKey, onClearApiKey, hasUserApiKey }) => {
+export const ElevenLabsApiKeyManager: React.FC<ElevenLabsApiKeyManagerProps> = ({ onSetApiKey, onClearApiKey, hasElevenLabsApiKey }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -36,7 +36,7 @@ export const ElevenLabsApiKeyManager: React.FC<ElevenLabsApiKeyManagerProps> = (
   };
 
   const getButtonText = () => {
-    return hasUserApiKey ? '[ ELEVENLABS: SET ]' : '[ ELEVENLABS: NOT_SET ]';
+    return hasElevenLabsApiKey ? '[ ELEVENLABS: SET ]' : '[ ELEVENLABS: DEFAULT ]';
   };
 
   return (
@@ -45,14 +45,14 @@ export const ElevenLabsApiKeyManager: React.FC<ElevenLabsApiKeyManagerProps> = (
         onClick={() => setIsOpen(!isOpen)}
         className="w-full py-2 px-4 border transition-colors text-lg"
         style={{ fontFamily: "'VT323', monospace", borderColor: 'var(--theme-border-color)', color: 'var(--theme-text-color-dim)' }}
-        title={hasUserApiKey ? "An ElevenLabs API key is active. Click to manage." : "Provide an ElevenLabs API key to enable Text-to-Speech."}
+        title={hasElevenLabsApiKey ? "An ElevenLabs API key is active. Click to manage." : "Using the default ElevenLabs API key. Click to provide your own."}
       >
         {getButtonText()}
       </button>
       {isOpen && (
         <div className="absolute top-full right-0 mt-2 w-full bg-black z-50 p-4" style={{ border: '1px solid var(--theme-border-color)' }}>
           <label htmlFor="elevenlabs-api-key-input" className="block text-sm mb-2" style={{ fontFamily: "'VT323', monospace", color: 'var(--theme-text-color-dim)' }}>
-            {hasUserApiKey ? "Update ElevenLabs API Key:" : "Provide ElevenLabs API Key:"}
+            {hasElevenLabsApiKey ? "Update ElevenLabs API Key:" : "Provide ElevenLabs API Key:"}
           </label>
           <input
             id="elevenlabs-api-key-input"
@@ -64,7 +64,7 @@ export const ElevenLabsApiKeyManager: React.FC<ElevenLabsApiKeyManagerProps> = (
             placeholder="Enter your API key..."
           />
           <div className="flex justify-end gap-2 mt-3">
-            {hasUserApiKey && (
+            {hasElevenLabsApiKey && (
               <button
                 onClick={handleClear}
                 className="py-1 px-3 border transition-colors text-base"
