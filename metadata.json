@@ -1,0 +1,5 @@
+{
+  "name": "Updated Character Generator",
+  "description": "An application that generates unique character concepts using AI. It creates detailed dossiers, generates images in chosen art styles, and supports iterative refinements with an immersive retro-terminal interface.",
+  "requestFramePermissions": []
+}
